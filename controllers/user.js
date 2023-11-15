@@ -40,9 +40,9 @@ exports.login = async (req, res, next) => {
         if(data.length == 0){
             res.status(404).json({error:"User not found!!!"});
         }else if(password != data[0].dataValues.password){
-            res.status(404).json({error:"Password Incorrect!!!"});
+            res.status(401).json({error:"User not authorized!!!"});
         }else{
-            res.status(201).json({success:"User Logged in!!!"})
+            res.status(201).json({success:"User login sucessful!!!"})
         }
         
 
