@@ -20,6 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const userRoutes = require('./routes/user');
 app.use('/user',userRoutes);
 
+const expenseRoutes = require('./routes/expense');
+app.use(expenseRoutes);
+
 // app.use(errorController.get404);
 
 sequelize.sync().then(result => {

@@ -43,6 +43,7 @@ function login(e){
          })
          .then(res =>{
             alert(res.data.success);
+            window.location.href = "index.html";
          })
          .catch(error=>{
             if(error){

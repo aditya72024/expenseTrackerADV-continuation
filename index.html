@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <title>Expense Tracker</title>
+</head>
+<body>
+
+      <div class="container">
+       <div id="main" class="card card-body">
+        <form id="addForm" class="">
+            <div class="row">
+
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <label for="expense">Expense Amount </label>
+                    <input type="tel" class="form-control" id="expense">
+                </div>
+
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <label for="description">Description </label>
+                    <input type="text" class="form-control" id="description">
+                </div>
+
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <label for="category">Category </label> 
+                    <select class="form-control" id="category" name="category">
+                    <option selected>Select Category</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Fooding">Fooding</option>
+                    <option value="Extras">Extras</option>
+                    </select>
+
+                    
+                </div>
+
+                <input type="hidden" value="" id="expenseId">
+
+
+                <div class="col-md-3 col-sm-12 col-xs-12">
+                    <input type="submit" class="btn btn-dark" value="Add Expense" style="margin-top: 13%;">
+                </div>
+            </div>
+
+          
+          
+        </form>
+        <div id="expenseDiv" style="display:none">
+        <h2 class="title">Expenses | Total : <span id="totalSpan">0</span></h2>
+            <ul id="items" class="list-group">
+              
+            </ul>
+        </div>
+       </div>
+      </div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+
+<script>
+
+var form = document.getElementById("addForm");
+var ul = document.getElementById("items");
+
+var deleteItems = document.getElementsByClassName("delete");
+var expenseDiv = document.getElementById("expenseDiv");
+var totalSpan = document.getElementById("totalSpan");
+form.addEventListener('submit', addItem);
+ul.addEventListener('click', removeItem);
+// deleteItems = document.addEventListener('click', removeItem);
+
+
+function loadExpenses(){
+    window.addEventListener("DOMContentLoaded",()=>{
+  axios.get("http://localhost:5000")
+  .then((response)=>{
+    if(response.data.length > 0){
+
+        
+        expenseDiv.style.display = "block";
+        let total = 0;
+
+        for(var i = 0; i<response.data.length;i++){
+
+
+       
+          total = response.data[i].expense+total;
+          showOutput(response.data[i], total);
+        }
+    }
+
+  }).catch((error)=>console.log(error))
+})
+}
+
+loadExpenses()
+
+
+
+
+
+function showOutput(data, total){
+
+      if(data){
+
+            expenseDiv.style.display = "block";
+            totalSpan.textContent = total;
+
+
+
+      }  
+
+
+      var expense = data.expense;
+      var description = data.description;
+      var category = data.category;
+      var id = data.id;
+
+
+      var value = expense + '-' + description + '-' + category;
+
+      li = document.createElement("li");
+      li.className = 'list-group-item';
+      li.setAttribute('data-id',id);
+      li.appendChild(document.createTextNode(value));
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-primary btn-sm float-right delete';
+      deleteBtn.appendChild(document.createTextNode('Delete'));
+      li.appendChild(deleteBtn);
+
+      var editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-primary btn-sm float-right edit';
+      editBtn.appendChild(document.createTextNode('Edit'));
+      li.appendChild(editBtn);
+
+      ul.appendChild(li);
+
+
+
+}
+
+
+
+function addItem(e){
+    e.preventDefault();
+    var expense = document.getElementById("expense").value;
+    var description = document.getElementById("description").value;
+    var category = document.getElementById("category").value;
+    var eid = document.getElementById("expenseId").value;
+
+
+    var entryObject = {};
+    entryObject.expense = expense;
+    entryObject.description = description;
+    entryObject.category = category;
+
+    if(eid){
+
+        putInTable(entryObject,eid);
+
+    }else{
+        storeInTable(entryObject)
+    }
+    
+
+
+    
+
+
+   
+
+    document.getElementById("expense").value = '';
+    document.getElementById("description").value = '';
+    document.getElementById("category").value = '';
+    document.getElementById("expenseId").value = '';
+
+
+}
+
+function putInTable(data,eid){
+
+      axios.put("http://localhost:5000/putExpense/"+eid,{data
+      })
+      .then(res =>{
+
+               
+             let total = parseFloat(JSON.parse(res.config.data).data.expense)+parseFloat(totalSpan.textContent);
+               
+             showOutput(JSON.parse(res.config.data).data, total);
+             
+      })
+      .catch(error=>console.error(error))
+
+}
+
+
+
+
+
+
+function storeInTable(data){
+
+      axios.post("http://localhost:5000/addExpense",{data
+      })
+      .then(res =>{
+
+               
+             let total = parseFloat(res.data.expense)+parseFloat(totalSpan.textContent);
+               
+             showOutput(res.data, total);
+             
+      })
+      .catch(error=>console.error(error))
+
+}
+
+
+
+
+
+
+function removeItem(e){
+
+
+
+    var liRemove = e.target.parentElement;
+    var liRemoveid = liRemove.getAttribute('data-id');
+    
+
+    if(e.target.classList.contains('delete')){
+
+       if(confirm("Are you sure?")){
+            axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid)
+            .then(res=>{
+             ul.removeChild(liRemove);
+             let total = parseFloat(totalSpan.textContent) - parseFloat(res.data.expense);
+               
+             loadExpenses();
+         }).catch(error=>console.error(error))
+        }}
+
+
+        if(e.target.classList.contains('edit')){
+
+            var liEdit = e.target.parentElement;
+            var liEditId = liEdit.getAttribute('data-id');
+
+            axios.get("http://localhost:5000/getParticularExpense/"+liRemoveid)
+            .then(res=> {
+
+            var expense = res.data.expense;
+            var description = res.data.description;
+            var category = res.data.category;
+            var eid = res.data.id;
+            document.getElementById("expense").value = expense;
+            document.getElementById("description").value = description;
+            document.getElementById("category").value = category;
+            document.getElementById("expenseId").value = eid;
+
+            let total = parseFloat(totalSpan.textContent) - parseFloat(res.data.expense);
+            totalSpan.textContent = total;
+
+            ul.removeChild(liEdit);
+        });
+
+
+
+
+    //     })
+    // }
+
+
+
+
+
+        }
+}
+
+</script>
+</html>
