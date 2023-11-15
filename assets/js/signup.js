@@ -42,6 +42,7 @@ function signUp(e){
          axios.post("http://localhost:5000/user/signup",{data
          })
          .then(res =>{
+            alert(res.data.success);
             window.location.href = "login.html";
          })
          .catch(error=>{

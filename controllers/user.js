@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 exports.signup = async (req, res, next) => {
     try{
@@ -6,17 +8,13 @@ exports.signup = async (req, res, next) => {
             throw new Error('All details are mandatory!!!');
         }
 
-        const username = req.body.data.username;
-        const email = req.body.data.email;
-        const password = req.body.data.password;
+        const {username,email,password} = req.body.data;
 
-        const data = await User.create({
-            username: username,
-            email: email,
-            password: password
-        });
-
-        res.status(201).json(data);
+        bcrypt.hash(password, saltRounds, async (err,hash)=>{
+            console.log(err);
+            await User.create({username, email, password : hash})
+            res.status(201).json({success: "User created successfully!!!"});
+        })
 
     }catch(err){
         res.status(500).json({error:err})
@@ -39,14 +37,22 @@ exports.login = async (req, res, next) => {
 
         if(data.length == 0){
             res.status(404).json({error:"User not found!!!"});
-        }else if(password != data[0].dataValues.password){
-            res.status(401).json({error:"User not authorized!!!"});
-        }else{
-            res.status(201).json({success:"User login sucessful!!!"})
         }
         
+        bcrypt.compare(password, data[0].password, function(err, result) {
 
-        // res.status(201).json(data);
+            if(err){
+                throw new Error('Something went wrong!!!');
+            }
+
+            if(result === true){
+                res.status(201).json({success:"User login sucessful!!!"})
+            }else{
+                res.status(401).json({error:"User not authorized!!!"});
+            }
+            
+        });
+        
 
     }catch(err){
         res.status(500).json({error:err})
