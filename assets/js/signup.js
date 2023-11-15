@@ -41,8 +41,20 @@ function signUp(e){
 
          axios.post("http://localhost:5000/user/signup",{data
          })
-         .then(res =>showOutput(res.data))
-         .catch(error=>console.error(error))
+         .then(res =>{
+            window.location.href = "login.html";
+         })
+         .catch(error=>{
+            if(error){
+                let errorMessage = "";
+                (error.response.data.error.errors).forEach(err => {
+                    errorMessage += err.message+'\n';
+                    
+                });
+    
+                alert(errorMessage);
+            }
+         });
 
     }else{
         console.log(false)
