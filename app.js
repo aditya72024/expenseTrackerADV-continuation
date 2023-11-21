@@ -17,13 +17,20 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const Expenses = require('./models/expenses');
+const User = require('./models/user');
+
+
 const userRoutes = require('./routes/user');
 app.use('/user',userRoutes);
 
 const expenseRoutes = require('./routes/expense');
 app.use(expenseRoutes);
 
-// app.use(errorController.get404);
+
+Expenses.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+User.hasMany(Expenses);
+
 
 sequelize.sync().then(result => {
 

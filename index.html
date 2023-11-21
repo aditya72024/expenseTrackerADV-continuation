@@ -71,10 +71,16 @@ form.addEventListener('submit', addItem);
 ul.addEventListener('click', removeItem);
 // deleteItems = document.addEventListener('click', removeItem);
 
+var token = localStorage.getItem('token');
 
-function loadExpenses(){
+
     window.addEventListener("DOMContentLoaded",()=>{
-  axios.get("http://localhost:5000")
+        loadExpenses();
+
+    })
+
+function loadExpenses(from){
+axios.get("http://localhost:5000", {headers: {"Authorization":token}})
   .then((response)=>{
     if(response.data.length > 0){
 
@@ -83,25 +89,23 @@ function loadExpenses(){
         let total = 0;
 
         for(var i = 0; i<response.data.length;i++){
-
-
-       
           total = response.data[i].expense+total;
-          showOutput(response.data[i], total);
+          console.log(response.data[i], total)
+          showOutput(response.data[i], total, from);
         }
+    }else{
+        expenseDiv.style.display = "none";
     }
 
   }).catch((error)=>console.log(error))
-})
 }
 
-loadExpenses()
 
 
 
 
 
-function showOutput(data, total){
+function showOutput(data, total, from='normalMethods'){
 
       if(data){
 
@@ -112,8 +116,8 @@ function showOutput(data, total){
 
       }  
 
-
-      var expense = data.expense;
+      if(from != 'deleteExpense'){
+        var expense = data.expense;
       var description = data.description;
       var category = data.category;
       var id = data.id;
@@ -137,6 +141,11 @@ function showOutput(data, total){
       li.appendChild(editBtn);
 
       ul.appendChild(li);
+
+      }
+
+
+
 
 
 
@@ -202,15 +211,16 @@ function putInTable(data,eid){
 
 
 function storeInTable(data){
+    console.log(token)
 
       axios.post("http://localhost:5000/addExpense",{data
-      })
+      },{headers: {"Authorization":token}})
       .then(res =>{
 
                
              let total = parseFloat(res.data.expense)+parseFloat(totalSpan.textContent);
                
-             showOutput(res.data, total);
+             showOutput(res.data, total, 'normalMethods');
              
       })
       .catch(error=>console.error(error))
@@ -233,12 +243,10 @@ function removeItem(e){
     if(e.target.classList.contains('delete')){
 
        if(confirm("Are you sure?")){
-            axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid)
+            axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
             .then(res=>{
              ul.removeChild(liRemove);
-             let total = parseFloat(totalSpan.textContent) - parseFloat(res.data.expense);
-               
-             loadExpenses();
+             loadExpenses('deleteExpense');
          }).catch(error=>console.error(error))
         }}
 

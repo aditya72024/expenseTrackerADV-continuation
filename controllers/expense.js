@@ -2,9 +2,9 @@ const Expense = require('../models/expenses');
 
 exports.getIndex = async (req,res,next) => {
     try{
-        const data = await Expense.findAll();
+        const data = await req.user.getExpenses();
         res.status(201).json(data);
-    }catch{
+    }catch(err){
         res.status(500).json({error: err})
     }
 }
@@ -18,8 +18,10 @@ exports.addExpense = async (req,res,next) => {
         const expense = req.body.data.expense; 
         const description = req.body.data.description; 
         const category = req.body.data.category; 
+
+       
     
-        const data = await Expense.create({
+        const data = await req.user.createExpense({
             expense : expense,
             description : description,
             category : category
@@ -39,9 +41,9 @@ try{
     const expenseId = req.params.expenseId;
 
     
-    const data = await Expense.findByPk(expenseId).then(expense => {
-         return expense.destroy();
-    })
+    const expense = await req.user.getExpenses({where: {id: expenseId }});
+
+    const data = expense[0].destroy();
 
     res.status(201).json(data);
 }catch(err){

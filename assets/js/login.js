@@ -43,6 +43,7 @@ function login(e){
          })
          .then(res =>{
             alert(res.data.success);
+            localStorage.setItem('token',res.data.token);
             window.location.href = "index.html";
          })
          .catch(error=>{

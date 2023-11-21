@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 
 exports.signup = async (req, res, next) => {
@@ -20,6 +21,11 @@ exports.signup = async (req, res, next) => {
         res.status(500).json({error:err})
 
     }
+}
+
+
+function generateAccessToken(id){
+    return jwt.sign({userId: id}, 'qlJ6Jg(j&Lh');
 }
 
 exports.login = async (req, res, next) => {
@@ -46,7 +52,7 @@ exports.login = async (req, res, next) => {
             }
 
             if(result === true){
-                res.status(201).json({success:"User login sucessful!!!"})
+                res.status(201).json({success:"User login sucessful!!!",token: generateAccessToken(data[0].id)})
             }else{
                 res.status(401).json({error:"User not authorized!!!"});
             }
