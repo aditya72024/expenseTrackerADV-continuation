@@ -9,6 +9,10 @@
 </head>
 <body>
 
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" id="payButton" href="javascript:void(0);">Become a premium user!!!</a>
+      </nav>
+
       <div class="container">
        <div id="main" class="card card-body">
         <form id="addForm" class="">
@@ -59,7 +63,9 @@
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 
-<script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>    
 
 var form = document.getElementById("addForm");
 var ul = document.getElementById("items");
@@ -174,18 +180,10 @@ function addItem(e){
         storeInTable(entryObject)
     }
     
-
-
-    
-
-
-   
-
     document.getElementById("expense").value = '';
     document.getElementById("description").value = '';
     document.getElementById("category").value = '';
     document.getElementById("expenseId").value = '';
-
 
 }
 
@@ -274,17 +272,34 @@ function removeItem(e){
             ul.removeChild(liEdit);
         });
 
-
-
-
-    //     })
-    // }
-
-
-
-
-
         }
+}
+
+document.getElementById("payButton").onclick = async function(e){
+    const response = await axios.get('http://localhost:5000/purchase/premium',{headers: {"Authorization":token}})
+    var options = {
+        "key": response.data.key_id,
+        "order_id": response.data.order.id,
+        "handler": async function(response){
+            await axios.post('http://localhost:5000/purchase/updateTransactionStatus',{
+                order_id: options.order_id,
+                payment_id: response.razorpay_payment_id,
+            }, {headers: {"Authorization": token}})
+            e.target.style.display = "none";
+            alert("You are a Premium User Now");
+        }
+
+    };
+
+    const rpz1 = new Razorpay(options);
+    rpz1.open();
+    e.preventDefault();
+
+    rpz1.on('payment.failed', function (response){
+        console.log(response);
+        alert("Something went wrong");
+
+    });
 }
 
 </script>

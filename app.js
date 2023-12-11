@@ -19,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const Expenses = require('./models/expenses');
 const User = require('./models/user');
+const Order = require('./models/orders');
 
 
 const userRoutes = require('./routes/user');
@@ -27,10 +28,15 @@ app.use('/user',userRoutes);
 const expenseRoutes = require('./routes/expense');
 app.use(expenseRoutes);
 
+const purchaseRoutes = require('./routes/purchase');
+app.use(purchaseRoutes);
+
 
 Expenses.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Expenses);
 
+User.hasMany(Order);
+Order.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 
 sequelize.sync().then(result => {
 
