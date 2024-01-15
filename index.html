@@ -161,18 +161,18 @@ function getLearderBoard(){
 
 function showLeaderBoard(data){
 
-    var toappendTable = `<table class="table" id="superTable"><thead><tr><th>Total Expense</th><th>Username</th></tr></thead><tbody>`;
+    var toappendTable = `<table class="table" id="superTable"><thead><tr><th>Username</th><th>Total Expense</th></tr></thead><tbody>`;
     for(let i = 0; i<data.length; i++){
         toappendTable += `<tr>`;
         const newkeys = [...Object.keys(data[0])]; 
             for(const newkey of newkeys){
 
                 console.log(newkey)
-                if(newkey != 'user'){
+                // if(newkey != 'user'){
                      toappendTable += `<td>${data[i][newkey]}</td>`;
-                 }else{
-                     toappendTable += `<td>${data[i][newkey].username}</td>`;
-                 }
+                //  }else{
+                //      toappendTable += `<td>${data[i][newkey].username}</td>`;
+                //  }
                 
                   
             }
