@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 
 exports.signup = async (req, res, next) => {
-    try{
+    
         if(!req.body.data.username && !req.body.data.email && !req.body.data.password ){
             throw new Error('All details are mandatory!!!');
         }
@@ -13,14 +13,15 @@ exports.signup = async (req, res, next) => {
 
         bcrypt.hash(password, saltRounds, async (err,hash)=>{
             console.log(err);
-            await User.create({username, email, password : hash})
-            res.status(201).json({success: "User created successfully!!!"});
+            try{
+                await User.create({username, email, password : hash});
+                res.status(201).json({success: "User created successfully!!!"});
+                }catch(err){   
+                    res.status(500).json({error:err})
+            }
         })
 
-    }catch(err){
-        res.status(500).json({error:err})
 
-    }
 }
 
 
@@ -29,13 +30,15 @@ function generateAccessToken(id){
 }
 
 exports.login = async (req, res, next) => {
-    try{
+    
         if(!req.body.data.email && !req.body.data.password ){
             throw new Error('All details are mandatory!!!');
         }
 
         const email = req.body.data.email;
         const password = req.body.data.password;
+
+        try{
 
         const data = await User.findAll({where : {email:email}});
 
@@ -52,7 +55,7 @@ exports.login = async (req, res, next) => {
             }
 
             if(result === true){
-                res.status(201).json({success:"User login sucessful!!!",token: generateAccessToken(data[0].id)})
+                res.status(201).json({success:"User login sucessful!!!",token: generateAccessToken(data[0].id),ispremiumuser: data[0].ispremiumuser})
             }else{
                 res.status(401).json({error:"User not authorized!!!"});
             }

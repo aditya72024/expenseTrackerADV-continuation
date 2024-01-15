@@ -31,7 +31,7 @@ exports.purchasePremimum = async (req,res,next) => {
         // })
         
     }catch(err){
-        console.Console.log(err)
+        console.log(err)
         res.status(500).json({error: err})
     }
 }
@@ -40,6 +40,7 @@ exports.purchasePremimum = async (req,res,next) => {
 exports.updateTransactionStatus = async (req,res,next) => {
     try{
         const {payment_id, order_id} = req.body;
+     
 
         const order = await Order.findOne({where: {orderId: order_id}}).catch(err => console.log(err));
         let afterOrderPromises = await Promise.all([ order.update({paymentId: payment_id, status: 'SUCCESSFUL'}), req.user.update({ispremiumuser: true})]).catch(err => console.log(err));

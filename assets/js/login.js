@@ -43,7 +43,9 @@ function login(e){
          })
          .then(res =>{
             alert(res.data.success);
+            console.log(res)
             localStorage.setItem('token',res.data.token);
+            localStorage.setItem('ispremiumuser',res.data.ispremiumuser);
             window.location.href = "index.html";
          })
          .catch(error=>{

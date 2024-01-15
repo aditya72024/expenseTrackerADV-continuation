@@ -1,8 +1,11 @@
 const Expense = require('../models/expenses');
-
+const User = require('../models/user');
+const sequelize = require('../util/database');
 exports.getIndex = async (req,res,next) => {
     try{
+        
         const data = await req.user.getExpenses();
+
         res.status(201).json(data);
     }catch(err){
         res.status(500).json({error: err})
@@ -52,6 +55,31 @@ try{
 
 
 
+}
+
+
+exports.getLeaderBoard = async (req,res,next) => {
+    try{
+
+        const data = await Expense.findAll({
+            include: [
+                {model: User, attributes: ['username']}
+              ],
+            attributes: [
+              [sequelize.fn('sum', sequelize.col('expense')), 'Total Expense'],
+            ],
+            group: ['userId'],
+            order: [
+                ['Total Expense', 'DESC'],
+                
+            ],
+          });
+
+          res.status(201).json(data)
+
+    }catch(err){
+        res.status(500).json({error: err})
+    }
 }
 
 

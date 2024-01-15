@@ -4,6 +4,7 @@ signUpForm.addEventListener('submit',signUp);
 
 function setSuccess(e){
     const inputControl = e.parentElement;
+    
     const errorDisplay = inputControl.querySelector('.fielderror');
     errorDisplay.innerText = "";
     inputControl.classList.add('success');
@@ -48,12 +49,14 @@ function signUp(e){
          .catch(error=>{
             if(error){
                 let errorMessage = "";
+
+                
                 (error.response.data.error.errors).forEach(err => {
-                    errorMessage += err.message+'\n';
+                     errorMessage += err.message+'\n';
                     
-                });
+                 });
     
-                alert(errorMessage);
+             alert(errorMessage);
             }
          });
 

@@ -21,7 +21,6 @@ const Expenses = require('./models/expenses');
 const User = require('./models/user');
 const Order = require('./models/orders');
 
-
 const userRoutes = require('./routes/user');
 app.use('/user',userRoutes);
 
