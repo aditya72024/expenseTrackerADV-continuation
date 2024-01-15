@@ -108,16 +108,20 @@ var ispremiumuser = localStorage.getItem('ispremiumuser');
 
     window.addEventListener("DOMContentLoaded",()=>{
         
-        if(ispremiumuser == 'true'){
-            document.getElementById("navbar").innerHTML = "<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'>You are a premium user!!! Show Leaderboard.</a>";
-            document.getElementById("showLearderBoard").addEventListener('click',getLearderBoard);
-            
-            document.getElementById("closeLeaderBoardModal").addEventListener('click',closeLeaderBoardModal);
+        if(ispremiumuser != null){
+            activatePremium();
             
         }
         loadExpenses();
 
     })
+
+function activatePremium(){
+    document.getElementById("navbar").innerHTML = "<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'>You are a premium user!!! Show Leaderboard.</a>";
+            document.getElementById("showLearderBoard").addEventListener('click',getLearderBoard);
+            document.getElementById("closeLeaderBoardModal").addEventListener('click',closeLeaderBoardModal);
+}    
+
 
 function closeLeaderBoardModal(){
     LeaderBoardModal.hide();
@@ -375,7 +379,8 @@ document.getElementById("payButton").onclick = async function(e){
                 payment_id: response.razorpay_payment_id,
             }, {headers: {"Authorization": token}})
             e.target.parentElement.innerHTML = "<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'>You are a premium user!!! Show LeaderBoard</a>";
-
+            localStorage.setItem('ispremiumuser',1);
+            activatePremium();
             alert("You are a Premium User Now");
         }
 

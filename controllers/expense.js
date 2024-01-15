@@ -29,6 +29,8 @@ exports.addExpense = async (req,res,next) => {
             description : description,
             category : category
         });
+
+        User.update({totalExpense: +(req.user.totalExpense)+ +(expense)}, {where:{id: req.user.id}});
     
         res.status(201).json(data);
     }catch(err){
@@ -61,28 +63,21 @@ try{
 exports.getLeaderBoard = async (req,res,next) => {
     try{
 
-
         const data = await User.findAll({
-            attributes: ['username', [sequelize.fn('sum', sequelize.col('expenses.expense')), 'Total Expense']],
-            include : [{
-                model: Expense, attributes: []
-            }],
-            group : ['users.id'],
-            order : [['Total Expense', 'DESC']],
+            attributes: ['username', 'totalExpense'],
+            order : [['totalExpense', 'DESC']],
         });
-        // const data = await Expense.findAll({
-        //     include: [
-        //         {model: User, attributes: ['username']}
-        //       ],
-        //     attributes: [
-        //       [sequelize.fn('sum', sequelize.col('expense')), 'Total Expense'],
-        //     ],
-        //     group: ['userId'],
-        //     order: [
-        //         ['Total Expense', 'DESC'],
-                
-        //     ],
-        //   });
+
+
+        // const data = await User.findAll({
+        //     attributes: ['username', [sequelize.fn('sum', sequelize.col('expenses.expense')), 'Total Expense']],
+        //     include : [{
+        //         model: Expense, attributes: []
+        //     }],
+        //     group : ['users.id'],
+        //     order : [['Total Expense', 'DESC']],
+        // });
+
 
           res.status(201).json(data)
 
