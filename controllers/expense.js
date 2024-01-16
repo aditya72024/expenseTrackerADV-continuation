@@ -13,8 +13,11 @@ exports.getIndex = async (req,res,next) => {
 }
 
 exports.addExpense = async (req,res,next) => {
-    console.log(req.body.data);
+ 
+    const t = await sequelize.transaction();
     try{
+
+        
         if(!req.body.data.expense){
             throw new Error('Expense is mandatory!');
         }    
@@ -28,12 +31,15 @@ exports.addExpense = async (req,res,next) => {
             expense : expense,
             description : description,
             category : category
-        });
+        }, {transaction: t});
 
-        User.update({totalExpense: +(req.user.totalExpense)+ +(expense)}, {where:{id: req.user.id}});
+        User.udate({totalExpense: +(req.user.totalExpense)+ +(expense)}, {where:{id: req.user.id}}, {transaction: t});
+        await t.commit();
     
         res.status(201).json(data);
     }catch(err){
+        await t.rollback();
+
         res.status(500).json({error: err})
     }
 }
