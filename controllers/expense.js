@@ -33,19 +33,20 @@ exports.addExpense = async (req,res,next) => {
             category : category
         }, {transaction: t});
 
-        User.udate({totalExpense: +(req.user.totalExpense)+ +(expense)}, {where:{id: req.user.id}}, {transaction: t});
+        User.update({totalExpense: +(req.user.totalExpense)+ +(expense)}, {where:{id: req.user.id}}, {transaction: t});
         await t.commit();
     
         res.status(201).json(data);
     }catch(err){
         await t.rollback();
 
-        res.status(500).json({error: err})
+        res.status(500).json({success:false, error: err})
     }
 }
 
 
 exports.deleteExpense = async (req,res,next) => {
+    const t = await sequelize.transaction();
 
 try{    
     
@@ -53,12 +54,20 @@ try{
 
     
     const expense = await req.user.getExpenses({where: {id: expenseId }});
+    const expenseAmount = expense[0]['expense'];
 
-    const data = expense[0].destroy();
+    
+    const data = await expense[0].destroy({transaction: t});
 
-    res.status(201).json(data);
+     User.update({totalExpense: +(req.user.totalExpense)- +(expenseAmount)}, {where:{id: req.user.id}}, {transaction: t});
+     await t.commit();
+
+
+     res.status(201).json(data);
 }catch(err){
-    res.status(500).json({error: err})
+    await t.rollback();
+
+    res.status(500).json({success:false, error: err})
 }
 
 
