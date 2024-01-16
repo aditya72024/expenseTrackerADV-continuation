@@ -21,6 +21,9 @@ const Expenses = require('./models/expenses');
 const User = require('./models/user');
 const Order = require('./models/orders');
 
+const passwordRoutes = require('./routes/password');
+app.use('/password',passwordRoutes);
+
 const userRoutes = require('./routes/user');
 app.use('/user',userRoutes);
 
@@ -29,6 +32,8 @@ app.use(expenseRoutes);
 
 const purchaseRoutes = require('./routes/purchase');
 app.use(purchaseRoutes);
+
+
 
 
 Expenses.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
