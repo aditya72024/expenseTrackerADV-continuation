@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const Expenses = require('./models/expenses');
 const User = require('./models/user');
 const Order = require('./models/orders');
+const forgotPasswordRequests = require('./models/forgotpasswordrequests');
 
 const passwordRoutes = require('./routes/password');
 app.use('/password',passwordRoutes);
@@ -34,7 +35,8 @@ const purchaseRoutes = require('./routes/purchase');
 app.use(purchaseRoutes);
 
 
-
+forgotPasswordRequests.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+User.hasMany(forgotPasswordRequests)
 
 Expenses.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Expenses);
