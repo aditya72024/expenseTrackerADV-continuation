@@ -75,6 +75,40 @@
           </div>
 
 
+          <div class="modal" tabindex="-1" role="dialog" id="expenseReportModal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Expense Report</h5>
+                  <button type="button" class="close" id="closeExpenseReportModal" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="dailyExpenseReportTableBody">
+                  <h1 class="text-center">Daily Report</h1>
+                </div>
+                <div class="modal-body" id="weeklyExpenseReportTableBody">
+                    <h1 class="text-center">Weekly Report</h1>
+                </div>
+                <div class="modal-body" id="monthlyExpenseReportTableBody">
+                    <h1 class="text-center">Monthly Report</h1>
+                </div>  
+
+                <div class="modal-footer">
+                    
+                    <button type="button" class="btn btn-primary">Download</button>
+                  </div>
+
+
+               
+              </div>
+            </div>
+          </div>
+
+
+          
+
+
         <div id="expenseDiv" style="display:none">
         <h2 class="title">Expenses | Total : <span id="totalSpan">0</span></h2>
             <ul id="items" class="list-group">
@@ -100,6 +134,7 @@ var totalSpan = document.getElementById("totalSpan");
 form.addEventListener('submit', addItem);
 ul.addEventListener('click', removeItem);
 var LeaderBoardModal = new bootstrap.Modal(document.getElementById('leaderBoardModal')); 
+var ExpenseReportModal = new bootstrap.Modal(document.getElementById('expenseReportModal')); 
 // deleteItems = document.addEventListener('click', removeItem);
 
 var token = localStorage.getItem('token');
@@ -117,15 +152,24 @@ var ispremiumuser = localStorage.getItem('ispremiumuser');
     })
 
 function activatePremium(){
-    document.getElementById("navbar").innerHTML = "<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'>You are a premium user!!! Show Leaderboard.</a>";
+    document.getElementById("navbar").innerHTML = "You are a premium user!!!<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'> View Leaderboard.</a> | <a class='navbar-brand' id='showExpenseReport' href='javascript:void(0);'> View Expense Report.</a>";
             document.getElementById("showLearderBoard").addEventListener('click',getLearderBoard);
             document.getElementById("closeLeaderBoardModal").addEventListener('click',closeLeaderBoardModal);
+            document.getElementById("closeExpenseReportModal").addEventListener('click',closeExpenseReportModal);
+            document.getElementById("showExpenseReport").addEventListener('click',getExpenseReport);
+
 }    
 
 
 function closeLeaderBoardModal(){
     LeaderBoardModal.hide();
 }    
+
+function closeExpenseReportModal(){
+    ExpenseReportModal.hide();
+}    
+
+
 
 function loadExpenses(from){
 axios.get("http://localhost:5000", {headers: {"Authorization":token}})
@@ -190,6 +234,10 @@ function showLeaderBoard(data){
      LeaderBoardModal.show();      
 }
 
+
+function getExpenseReport(){
+    ExpenseReportModal.show();    
+}
 
 
 
