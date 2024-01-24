@@ -1,6 +1,11 @@
 const Expense = require('../models/expenses');
 const User = require('../models/user');
 const sequelize = require('../util/database');
+var AWS = require('aws-sdk');
+var moment = require('moment');
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+
 exports.getIndex = async (req,res,next) => {
     try{
         
@@ -101,26 +106,160 @@ exports.getLeaderBoard = async (req,res,next) => {
     }
 }
 
+exports.downloadExpenses = async (req,res,next)=>{
+    try{
+
+        const expenses = await req.user.getExpenses();
+        const stringifiedExpenses = JSON.stringify(expenses);
+        const userId = req.user.id;
+        const filename = `Expense${userId}/${new Date()}.txt`;
+        const fileURL = await uploadToS3(stringifiedExpenses, filename);
+        res.status(201).json({fileURL, success: true})
+
+    }catch(err){
+        res.status(500).json({fileURL: '',success: false, err: err})
+    }
+}
+
+function uploadToS3(data,filename){
+    const BUCKET_NAME = process.env.BUCKET_NAME;
+    const IAM_USER_KEY = process.env.IAM_USER_KEY;
+    const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
+
+    let s3bucket = new AWS.S3(
+        {
+            accessKeyId: IAM_USER_KEY,
+            secretAccessKey: IAM_USER_SECRET
+        }
+    )
+
+    var params = {
+        Bucket : BUCKET_NAME,
+        Key : filename,
+        Body : data,
+        ACL : 'public-read'
+    }
+
+    return new Promise((resolve, reject)=>{
+        s3bucket.upload(params,(err,s3response)=>{
+            if(err){
+                reject(err)
+            }else{
+                resolve(s3response.Location)
+            }
+        })
+    })
+}
+
 
 exports.getParticularExpense = async (req,res,next) => {
 
     try{    
-        
         const expenseId = req.params.expenseId;
-    
-        
         const data = await Expense.findByPk(expenseId);
-    
         res.status(201).json(data);
     }catch(err){
         res.status(500).json({error: err})
-    }
-    
-    
-    
-    }
+    }}
 
-    exports.putExpense = async (req,res,next) => {
+exports.dailyExpenses = async (req,res,next)=>{
+
+    const { Op } = require("sequelize");
+    const TODAY_START = moment().format('YYYY-MM-DD 00:00');
+    const NOW = moment().format('YYYY-MM-DD 23:59');
+    // console.log(TODAY_START);
+
+    try{
+
+
+
+         const data = await req.user.getExpenses({
+             where: {
+               createdAt: { 
+                 [Op.between]: [TODAY_START,NOW]
+               
+             }
+            
+         },
+         attributes: ['expense', 'description', 'category'],
+     });
+
+         res.status(201).json(data);
+
+
+     }catch(err){
+        res.status(500).json({error: err});
+
+     }
+}    
+
+
+exports.weeklyExpenses = async (req,res,next)=>{
+
+    const { Op } = require("sequelize");
+    const START = moment().startOf('week').format('YYYY-MM-DD 00:00');
+    const END = moment().endOf('week').format('YYYY-MM-DD 23:59');
+    // console.log(TODAY_START);
+
+    try{
+
+
+
+         const data = await req.user.getExpenses({
+             where: {
+               createdAt: { 
+                 [Op.between]: [START,END]
+               
+             }
+            
+         },
+         attributes: ['expense', 'description', 'category'],
+     });
+
+         res.status(201).json(data);
+
+
+     }catch(err){
+        res.status(500).json({error: err});
+
+     }
+}    
+
+
+exports.monthlyExpenses = async (req,res,next)=>{
+
+    const { Op } = require("sequelize");
+    const START = moment().startOf('month').format('YYYY-MM-DD 00:00');
+    const END = moment().endOf('month').format('YYYY-MM-DD 23:59');
+    // console.log(TODAY_START);
+
+    try{
+
+
+
+         const data = await req.user.getExpenses({
+             where: {
+               createdAt: { 
+                 [Op.between]: [START,END]
+               
+             }
+            
+         },
+         attributes: ['expense', 'description', 'category'],
+     });
+
+         res.status(201).json(data);
+
+
+     }catch(err){
+        res.status(500).json({error: err});
+
+     }
+}    
+
+
+
+exports.putExpense = async (req,res,next) => {
 
         try{    
             
