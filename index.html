@@ -74,6 +74,23 @@
             </div>
           </div>
 
+          <div class="modal" tabindex="-1" role="dialog" id="downloadHistoryModal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Download History</h5>
+                  <button type="button" class="close" id="closeDownloadHistoryModal" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="downloadHistoryTableBody">
+                  
+                </div>
+               
+              </div>
+            </div>
+          </div>
+
 
           <div class="modal" tabindex="-1" role="dialog" id="expenseReportModal">
             <div class="modal-dialog" role="document">
@@ -118,6 +135,10 @@
        </div>
       </div>
 
+
+      <div id="pagination">
+      </div>
+
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 
@@ -135,6 +156,7 @@ form.addEventListener('submit', addItem);
 ul.addEventListener('click', removeItem);
 var LeaderBoardModal = new bootstrap.Modal(document.getElementById('leaderBoardModal')); 
 var ExpenseReportModal = new bootstrap.Modal(document.getElementById('expenseReportModal')); 
+var DownloadHistoryModal = new bootstrap.Modal(document.getElementById('downloadHistoryModal')); 
 // deleteItems = document.addEventListener('click', removeItem);
 
 var token = localStorage.getItem('token');
@@ -147,16 +169,20 @@ var ispremiumuser = localStorage.getItem('ispremiumuser');
             activatePremium();
             
         }
-        loadExpenses();
+        loadExpenses(1);
 
     })
 
 function activatePremium(){
-    document.getElementById("navbar").innerHTML = "You are a premium user!!!<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'> View Leaderboard.</a> | <a class='navbar-brand' id='showExpenseReport' href='javascript:void(0);'> View Expense Report.</a>";
+    document.getElementById("navbar").innerHTML = "You are a premium user!!!<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'> View Leaderboard.</a> | <a class='navbar-brand' id='showExpenseReport' href='javascript:void(0);'> View Expense Report.</a> | <a class='navbar-brand' id='showDownloadHistory' href='javascript:void(0);'> Download History.</a>";
             document.getElementById("showLearderBoard").addEventListener('click',getLearderBoard);
+            document.getElementById("showExpenseReport").addEventListener('click',getExpenseReport);
+            document.getElementById("showDownloadHistory").addEventListener('click',getDownloadHistory);
+
             document.getElementById("closeLeaderBoardModal").addEventListener('click',closeLeaderBoardModal);
             document.getElementById("closeExpenseReportModal").addEventListener('click',closeExpenseReportModal);
-            document.getElementById("showExpenseReport").addEventListener('click',getExpenseReport);
+            document.getElementById("closeDownloadHistoryModal").addEventListener('click',closeDownloadHistoryModal);
+
             document.getElementById("expenseDownload").addEventListener('click',expenseDownload);
 
 
@@ -169,6 +195,10 @@ function closeLeaderBoardModal(){
 
 function closeExpenseReportModal(){
     ExpenseReportModal.hide();
+}    
+
+function closeDownloadHistoryModal(){
+    DownloadHistoryModal.hide();
 }    
 
 function expenseDownload(){
@@ -187,10 +217,14 @@ function expenseDownload(){
     }).catch((error)=>console.log(error))
 }
 
-function loadExpenses(from){
-axios.get("http://localhost:5000", {headers: {"Authorization":token}})
+function loadExpenses(page){
+axios.get(`http://localhost:5000?page=${page}`, {headers: {"Authorization":token}})
   .then((response)=>{
-    if(response.data.length > 0){
+
+    const {data,totalExpenses, pageData} = response.data;
+
+    console.log(response)
+    if(data.length > 0){
 
        
 
@@ -198,17 +232,63 @@ axios.get("http://localhost:5000", {headers: {"Authorization":token}})
         expenseDiv.style.display = "block";
         let total = 0;
 
-        for(var i = 0; i<response.data.length;i++){
-          total = response.data[i].expense+total;
-          console.log(response.data[i], total)
-          showOutput(response.data[i], total, from);
+        for(var i = 0; i<data.length;i++){
+        //   total = data[i].expense+total;
+        //   console.log(data[i], total)
+            showOutput(data[i], totalExpenses);
+            
         }
+
+        
+
+        showPagination(pageData)
+
     }else{
         expenseDiv.style.display = "none";
     }
 
   }).catch((error)=>console.log(error))
 }
+
+function showPagination({
+    currentPage,
+    hasNextPage,
+    nextPage,
+    hasPreviousPage,
+    previousPage,
+    lastPage,
+}){
+
+    document.getElementById("pagination").innerHTML = "";
+
+    if(hasPreviousPage){
+        const btn2 = document.createElement("button")
+        btn2.innerHTML = previousPage,
+        btn2.addEventListener('click',()=>{
+            loadExpenses(previousPage)
+        })
+        document.getElementById("pagination").appendChild(btn2)
+    }
+
+    const btn1 = document.createElement("button")
+    btn1.innerHTML = `<h3>${currentPage}</h3>`
+    btn1.addEventListener('click',()=>{
+            loadExpenses(currentPage)
+        })
+        document.getElementById("pagination").appendChild(btn1)
+
+    if(hasNextPage){
+        const btn3 = document.createElement("button");
+        btn3.innerHTML = nextPage;
+        btn3.addEventListener('click',()=>{
+            loadExpenses(nextPage)
+        })
+        document.getElementById("pagination").appendChild(btn3)
+
+    }    
+
+}
+
 
 
 
@@ -259,6 +339,14 @@ function getExpenseReport(){
     ExpenseReportModal.show();    
 }
 
+function getDownloadHistory(){
+DownloadHistory();
+DownloadHistoryModal.show();    
+}
+
+
+
+
 
 function DailyExpenses(){
 
@@ -297,6 +385,48 @@ axios.get("http://localhost:5000/getMonthlyExpenses", {headers: {"Authorization"
   })
   .catch(error=>console.error(error))
 
+
+}
+
+function DownloadHistory(){
+
+axios.get("http://localhost:5000/getDownloadHistory", {headers: {"Authorization":token}})
+  .then(res =>{
+        console.log(res.data);
+        showDownloadHistory(res.data)
+         
+  })
+  .catch(error=>console.error(error))
+
+
+}
+
+function showDownloadHistory(data){
+    var toappendTable = `<h4 class="text-center">Download History</h4><br><table class="table" id="superTable"><thead><tr><th>File URL</th></tr></thead><tbody>`;
+        let totalExpense = 0;
+        for(let i = 0; i<data.length; i++){
+        toappendTable += `<tr>`;
+        const newkeys = [...Object.keys(data[0])]; 
+        
+            for(const newkey of newkeys){
+
+               
+                     toappendTable += `<td><a href="${data[i][newkey]}" download="${data[i][newkey]}.csv">${data[i][newkey]}</a></td>`;
+                     if(newkey == 'expense'){
+                        totalExpense += +data[i][newkey];
+                     }
+               
+                
+                  
+            }
+            toappendTable += `</tr>`;
+          }    
+
+     toappendTable += `</tbody></table>`;   
+     
+     document.getElementById("downloadHistoryTableBody").innerHTML = "";
+     document.getElementById("downloadHistoryTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
+       
 
 }
 
@@ -400,7 +530,11 @@ function showMonthlyExpenses(data){
         } 
 
 
-function showOutput(data, total, from='normalMethods'){
+function showOutput(data, total){
+
+    ul.innerHTML = "";
+
+
 
       if(data){
 
@@ -411,8 +545,7 @@ function showOutput(data, total, from='normalMethods'){
 
       }  
 
-      if(from != 'deleteExpense'){
-        var expense = data.expense;
+     var expense = data.expense;
       var description = data.description;
       var category = data.category;
       var id = data.id;
@@ -437,7 +570,7 @@ function showOutput(data, total, from='normalMethods'){
 
       ul.appendChild(li);
 
-      }
+  
 
 
 
@@ -505,9 +638,7 @@ function storeInTable(data){
       .then(res =>{
 
                
-             let total = parseFloat(res.data.expense)+parseFloat(totalSpan.textContent);
-               
-             showOutput(res.data, total, 'normalMethods');
+             loadExpenses('1')
              
       })
       .catch(error=>console.error(error))
@@ -533,7 +664,7 @@ function removeItem(e){
             axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
             .then(res=>{
              ul.removeChild(liRemove);
-             loadExpenses('deleteExpense');
+             loadExpenses(1);
          }).catch(error=>console.error(error))
         }}
 

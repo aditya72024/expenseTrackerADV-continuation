@@ -1,18 +1,48 @@
 const Expense = require('../models/expenses');
 const User = require('../models/user');
+const Fileurl = require('../models/fileurls');
 const sequelize = require('../util/database');
 var AWS = require('aws-sdk');
 var moment = require('moment');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
+const Math = require('mathjs');  
 
 exports.getIndex = async (req,res,next) => {
     try{
-        
-        const data = await req.user.getExpenses();
 
-        res.status(201).json(data);
+        let ITEMS_PER_PAGE = 1;
+        const page = +req.query.page || 1
+        let totalItems;
+        
+        const toatlCountExpenses = await req.user.countExpenses();
+
+        totalItems = toatlCountExpenses;
+        const data = await req.user.getExpenses({
+            offset : (page-1) * ITEMS_PER_PAGE,
+            limit : ITEMS_PER_PAGE
+        })
+
+        const totalExpenses = req.user.totalExpense; 
+
+        console.log(data);
+
+
+        res.status(201).json({
+            data: data,
+            totalExpenses: totalExpenses,
+            pageData :{
+                currentPage : page,
+                hasNextPage: ITEMS_PER_PAGE*page < totalItems,
+                nextPage: page+1,
+                hasPreviousPage : page > 1,
+                previousPage: page-1,
+                lastPage: Math.ceil(totalItems/ITEMS_PER_PAGE),
+            }
+
+        });
     }catch(err){
+        console.log(err);
         res.status(500).json({error: err})
     }
 }
@@ -79,6 +109,20 @@ try{
 
 }
 
+exports.downloadHistory = async (req,res,next) => {
+    try{
+        const data = await req.user.getFileurls({
+            attributes: ['fileurl'],
+            
+        });
+
+        res.status(201).json(data)
+
+    }catch(err){
+        res.status(500).json({error: err})
+    }
+}
+
 
 exports.getLeaderBoard = async (req,res,next) => {
     try{
@@ -87,6 +131,8 @@ exports.getLeaderBoard = async (req,res,next) => {
             attributes: ['username', 'totalExpense'],
             order : [['totalExpense', 'DESC']],
         });
+
+        
 
 
         // const data = await User.findAll({
@@ -114,6 +160,9 @@ exports.downloadExpenses = async (req,res,next)=>{
         const userId = req.user.id;
         const filename = `Expense${userId}/${new Date()}.txt`;
         const fileURL = await uploadToS3(stringifiedExpenses, filename);
+        await req.user.createFileurl(
+            {fileurl : fileURL}
+        )
         res.status(201).json({fileURL, success: true})
 
     }catch(err){
@@ -134,7 +183,7 @@ function uploadToS3(data,filename){
     )
 
     var params = {
-        Bucket : BUCKET_NAME,
+        Bucket : process.env.BUCKET_NAME,
         Key : filename,
         Body : data,
         ACL : 'public-read'

@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const Expenses = require('./models/expenses');
 const User = require('./models/user');
 const Order = require('./models/orders');
+const Fileurl = require('./models/fileurls');
 const forgotPasswordRequests = require('./models/forgotpasswordrequests');
 
 const passwordRoutes = require('./routes/password');
@@ -34,6 +35,9 @@ app.use(expenseRoutes);
 const purchaseRoutes = require('./routes/purchase');
 app.use(purchaseRoutes);
 
+
+Fileurl.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+User.hasMany(Fileurl)
 
 forgotPasswordRequests.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(forgotPasswordRequests)
