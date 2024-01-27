@@ -7,17 +7,21 @@ var moment = require('moment');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 const Math = require('mathjs');  
+// var LocalStorage = require('node-localstorage').LocalStorage,
+// localStorage = new LocalStorage('./scratch');
 
 exports.getIndex = async (req,res,next) => {
     try{
 
-        let ITEMS_PER_PAGE = 1;
-        const page = +req.query.page || 1
+
+        let ITEMS_PER_PAGE  = +req.query.noofrows;
+        const page = +req.query.page;
         let totalItems;
         
         const toatlCountExpenses = await req.user.countExpenses();
 
         totalItems = toatlCountExpenses;
+        
         const data = await req.user.getExpenses({
             offset : (page-1) * ITEMS_PER_PAGE,
             limit : ITEMS_PER_PAGE
@@ -31,6 +35,7 @@ exports.getIndex = async (req,res,next) => {
         res.status(201).json({
             data: data,
             totalExpenses: totalExpenses,
+            totalItems: totalItems,
             pageData :{
                 currentPage : page,
                 hasNextPage: ITEMS_PER_PAGE*page < totalItems,

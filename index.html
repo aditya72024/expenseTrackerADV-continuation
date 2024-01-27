@@ -136,7 +136,10 @@
       </div>
 
 
-      <div id="pagination">
+      <div id="pagination" style="width:50%;float:left;">
+      </div>
+      <div id="rowperpage" style="width:50%;float:left;">
+
       </div>
 
 </body>
@@ -157,6 +160,16 @@ ul.addEventListener('click', removeItem);
 var LeaderBoardModal = new bootstrap.Modal(document.getElementById('leaderBoardModal')); 
 var ExpenseReportModal = new bootstrap.Modal(document.getElementById('expenseReportModal')); 
 var DownloadHistoryModal = new bootstrap.Modal(document.getElementById('downloadHistoryModal')); 
+
+
+
+
+
+function triggerRowPerPage(){
+        loadExpenses(localStorage.getItem("noofpage"),document.getElementById("noofrows").value);
+        localStorage.setItem("noofrows",document.getElementById("noofrows").value);
+    
+}
 // deleteItems = document.addEventListener('click', removeItem);
 
 var token = localStorage.getItem('token');
@@ -164,12 +177,28 @@ var ispremiumuser = localStorage.getItem('ispremiumuser');
 
 
     window.addEventListener("DOMContentLoaded",()=>{
+
+        
+
         
         if(ispremiumuser != null){
             activatePremium();
             
         }
-        loadExpenses(1);
+
+            var noofrows = localStorage.getItem("noofrows");
+            var noofpage = localStorage.getItem("noofpage");
+
+            if(!noofrows){
+                localStorage.setItem("noofrows",1);
+            }
+            if(!noofpage){
+                localStorage.setItem("noofpage",1);
+            }
+
+            loadExpenses(noofpage,noofrows);
+            
+
 
     })
 
@@ -217,31 +246,33 @@ function expenseDownload(){
     }).catch((error)=>console.log(error))
 }
 
-function loadExpenses(page){
-axios.get(`http://localhost:5000?page=${page}`, {headers: {"Authorization":token}})
+function loadExpenses(noofpage,noofrows){
+axios.get(`http://localhost:5000?page=${noofpage}&noofrows=${noofrows}`, {headers: {"Authorization":token}})
   .then((response)=>{
 
-    const {data,totalExpenses, pageData} = response.data;
+    document.getElementById("pagination").innerHTML ="";
+    document.getElementById("rowperpage").innerHTML ="";
+    document.getElementById("items").innerHTML ="";
+    items
 
-    console.log(response)
+    const {data,totalExpenses,totalItems, pageData} = response.data;
+
     if(data.length > 0){
 
-       
 
-        
         expenseDiv.style.display = "block";
         let total = 0;
 
         for(var i = 0; i<data.length;i++){
-        //   total = data[i].expense+total;
-        //   console.log(data[i], total)
-            showOutput(data[i], totalExpenses);
-            
+            showOutput(data[i], totalExpenses,pageData);   
         }
+
+        showRowSelector(totalItems);
+        showPagination(pageData);
 
         
 
-        showPagination(pageData)
+       
 
     }else{
         expenseDiv.style.display = "none";
@@ -265,15 +296,15 @@ function showPagination({
         const btn2 = document.createElement("button")
         btn2.innerHTML = previousPage,
         btn2.addEventListener('click',()=>{
-            loadExpenses(previousPage)
+            loadExpenses(previousPage,localStorage.getItem("noofrows"))
         })
         document.getElementById("pagination").appendChild(btn2)
     }
 
     const btn1 = document.createElement("button")
-    btn1.innerHTML = `<h3>${currentPage}</h3>`
+    btn1.innerHTML = `<h3 id="currentPage">${currentPage}</h3>`
     btn1.addEventListener('click',()=>{
-            loadExpenses(currentPage)
+            loadExpenses(currentPage,localStorage.getItem("noofrows"))
         })
         document.getElementById("pagination").appendChild(btn1)
 
@@ -281,7 +312,7 @@ function showPagination({
         const btn3 = document.createElement("button");
         btn3.innerHTML = nextPage;
         btn3.addEventListener('click',()=>{
-            loadExpenses(nextPage)
+            loadExpenses(nextPage,localStorage.getItem("noofrows"))
         })
         document.getElementById("pagination").appendChild(btn3)
 
@@ -530,9 +561,7 @@ function showMonthlyExpenses(data){
         } 
 
 
-function showOutput(data, total){
-
-    ul.innerHTML = "";
+function showOutput(data, total,pageData){
 
 
 
@@ -540,9 +569,6 @@ function showOutput(data, total){
 
             expenseDiv.style.display = "block";
             totalSpan.textContent = total;
-
-
-
       }  
 
      var expense = data.expense;
@@ -570,12 +596,25 @@ function showOutput(data, total){
 
       ul.appendChild(li);
 
-  
+      
+     
+
+}
 
 
+function showRowSelector(totalItems){
 
+    let selectBody = `<select name="noofrows" id="noofrows" onchange="triggerRowPerPage()">`
 
+    for(let i=1; i<=totalItems;i++){
 
+        selectBody += `<option value="${i}" ${localStorage.getItem("noofrows") == i ? 'selected=selected' : ''} >${i}</option>`;
+
+    }    
+            
+            
+    selectBody += `</select>`;
+    document.getElementById("rowperpage").appendChild(document.createRange().createContextualFragment(selectBody))
 
 }
 
@@ -638,7 +677,7 @@ function storeInTable(data){
       .then(res =>{
 
                
-             loadExpenses('1')
+             loadExpenses(localStorage.getItem("noofpage"),localStorage.getItem("noofrows"));
              
       })
       .catch(error=>console.error(error))
@@ -664,7 +703,7 @@ function removeItem(e){
             axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
             .then(res=>{
              ul.removeChild(liRemove);
-             loadExpenses(1);
+             loadExpenses(noofpage,noofrows);
          }).catch(error=>console.error(error))
         }}
 
