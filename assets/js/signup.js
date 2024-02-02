@@ -38,30 +38,33 @@ function signUp(e){
         data.email = email;
         data.password = password;
 
-        console.log(data);
-
-         axios.post("http://localhost:5000/user/signup",{data
-         })
-         .then(res =>{
-            alert(res.data.success);
-            window.location.href = "login.html";
-         })
-         .catch(error=>{
-            if(error){
-                let errorMessage = "";
-
-                
-                (error.response.data.error.errors).forEach(err => {
-                     errorMessage += err.message+'\n';
-                    
-                 });
-    
-             alert(errorMessage);
-            }
-         });
+        getSignUpData(data);
 
     }else{
         console.log(false)
+    }
+}
+
+const getSignUpData = async(data) => {
+
+    try{
+        const res = await axios.post("http://localhost:5000/user/signup",{data})
+        alert(res.data.message);
+        window.location.href = "login.html";
+    }catch(error){
+        // console.log(error.response.data);
+        if(error){
+                let errorMessage = "";
+
+                
+                (error.response.data.err.errors).forEach(err => {
+                        errorMessage += err.message+'\n';
+                    
+                    });
+
+                alert(errorMessage);
+            }
+
     }
 }
 

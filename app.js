@@ -1,6 +1,10 @@
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const fs = require('fs');
 
 // const errorController = require('./controllers/error');
 const sequelize = require('./util/database');
@@ -34,6 +38,17 @@ app.use(expenseRoutes);
 
 const purchaseRoutes = require('./routes/purchase');
 app.use(purchaseRoutes);
+
+app.use(helmet());
+app.use(compression());
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),{flag:'a'});
+
+
+app.use(morgan('combined', {stream: accessLogStream}));
+
+
 
 
 Fileurl.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});

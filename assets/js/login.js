@@ -37,25 +37,27 @@ function login(e){
         data.email = email;
         data.password = password;
 
-        console.log(data);
-
-         axios.post("http://localhost:5000/user/login",{data
-         })
-         .then(res =>{
-            alert(res.data.success);
-            console.log(res)
-            localStorage.setItem('token',res.data.token);
-            localStorage.setItem('ispremiumuser',res.data.ispremiumuser);
-            window.location.href = "index.html";
-         })
-         .catch(error=>{
-            if(error){
-                alert(error.response.data.error);
-            }
-         });
+        getLoginData(data);
 
     }else{
         console.log(false)
+    }
+}
+
+const getLoginData = async (data) => {
+
+    try{
+        
+        const res = await axios.post("http://localhost:5000/user/login",{data});
+        alert(res.data.message);
+        localStorage.setItem('token',res.data.token);
+        localStorage.setItem('ispremiumuser',res.data.ispremiumuser);
+        window.location.href = "index.html";
+    }catch(error){
+        if(error){
+            console.log(error.response.data)
+            alert(error.response.data.message);
+        }
     }
 }
 

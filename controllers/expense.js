@@ -4,8 +4,8 @@ const Fileurl = require('../models/fileurls');
 const sequelize = require('../util/database');
 var AWS = require('aws-sdk');
 var moment = require('moment');
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env' });
+// const dotenv = require('dotenv');
+// dotenv.config({ path: './.env' });
 const Math = require('mathjs');  
 // var LocalStorage = require('node-localstorage').LocalStorage,
 // localStorage = new LocalStorage('./scratch');

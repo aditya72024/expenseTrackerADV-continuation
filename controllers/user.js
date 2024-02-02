@@ -4,23 +4,36 @@ const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 
 exports.signup = async (req, res, next) => {
-    
+    try{
         if(!req.body.data.username && !req.body.data.email && !req.body.data.password ){
-            throw new Error('All details are mandatory!!!');
+
+            throw {status: 403, message: 'All Details Mandatory!!!'};
+            
         }
 
         const {username,email,password} = req.body.data;
 
         bcrypt.hash(password, saltRounds, async (err,hash)=>{
-            console.log(err);
-            try{
-                await User.create({username, email, password : hash});
-                res.status(201).json({success: "User created successfully!!!"});
-                }catch(err){   
-                    res.status(500).json({error:err})
-            }
+
+            if(err){
+                    throw {status: 500, message: "Something went wrong!!!"};
+                }
+          
+                try{
+                    await User.create({username, email, password : hash});
+                    res.status(201).json({success: true, message:"User created successfully!!!"});
+                }catch(err){
+                    res.status(500).json({err:err})
+                }
+                
+                
+                
         })
 
+
+    }catch(err){ 
+                res.status(err.status).json({status: err.status, message: err.message})
+}
 
 }
 
@@ -31,40 +44,45 @@ function generateAccessToken(id){
 
 exports.login = async (req, res, next) => {
     
+    try{
+
         if(!req.body.data.email && !req.body.data.password ){
-            throw new Error('All details are mandatory!!!');
+            throw {status: 403, message: 'All Details Mandatory!!!'};
         }
 
         const email = req.body.data.email;
         const password = req.body.data.password;
 
-        try{
-
+       
         const data = await User.findAll({where : {email:email}});
 
         console.log(data);
 
         if(data.length == 0){
-            res.status(404).json({error:"User not found!!!"});
+            throw {status: 404, message: 'User not found!!!'};
+          
         }
         
         bcrypt.compare(password, data[0].password, function(err, result) {
 
             if(err){
-                throw new Error('Something went wrong!!!');
+                throw {status: 500, message: 'Something went wrong!!!'};
+            
             }
 
             if(result === true){
-                res.status(201).json({success:"User login sucessful!!!",token: generateAccessToken(data[0].id),ispremiumuser: data[0].ispremiumuser})
+                res.status(201).json({success:true,message:"User logged in !!!",token: generateAccessToken(data[0].id),ispremiumuser: data[0].ispremiumuser})
             }else{
-                res.status(401).json({error:"User not authorized!!!"});
+
+                res.status(401).json({success:false,message:"User not authorised !!!"});
+               
             }
             
         });
         
 
     }catch(err){
-        res.status(500).json({error:err})
+        res.status(err.status || 500).json({status: err.status, message: err.message})
 
     }
 }
