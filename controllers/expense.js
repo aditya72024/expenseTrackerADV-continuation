@@ -4,23 +4,21 @@ const Fileurl = require('../models/fileurls');
 const sequelize = require('../util/database');
 var AWS = require('aws-sdk');
 var moment = require('moment');
-// const dotenv = require('dotenv');
-// dotenv.config({ path: './.env' });
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
 const Math = require('mathjs');  
-// var LocalStorage = require('node-localstorage').LocalStorage,
-// localStorage = new LocalStorage('./scratch');
+
 
 exports.getIndex = async (req,res,next) => {
     try{
-
 
         let ITEMS_PER_PAGE  = +req.query.noofrows;
         const page = +req.query.page;
         let totalItems;
         
-        const toatlCountExpenses = await req.user.countExpenses();
+        const totalCountExpenses = await req.user.countExpenses();
 
-        totalItems = toatlCountExpenses;
+        totalItems = totalCountExpenses;
         
         const data = await req.user.getExpenses({
             offset : (page-1) * ITEMS_PER_PAGE,
@@ -28,9 +26,6 @@ exports.getIndex = async (req,res,next) => {
         })
 
         const totalExpenses = req.user.totalExpense; 
-
-        console.log(data);
-
 
         res.status(201).json({
             data: data,
@@ -46,6 +41,7 @@ exports.getIndex = async (req,res,next) => {
             }
 
         });
+
     }catch(err){
         console.log(err);
         res.status(500).json({error: err})
@@ -117,7 +113,8 @@ try{
 exports.downloadHistory = async (req,res,next) => {
     try{
         const data = await req.user.getFileurls({
-            attributes: ['fileurl'],
+            attributes: ['fileurl','createdAt'],
+
             
         });
 
@@ -136,19 +133,6 @@ exports.getLeaderBoard = async (req,res,next) => {
             attributes: ['username', 'totalExpense'],
             order : [['totalExpense', 'DESC']],
         });
-
-        
-
-
-        // const data = await User.findAll({
-        //     attributes: ['username', [sequelize.fn('sum', sequelize.col('expenses.expense')), 'Total Expense']],
-        //     include : [{
-        //         model: Expense, attributes: []
-        //     }],
-        //     group : ['users.id'],
-        //     order : [['Total Expense', 'DESC']],
-        // });
-
 
           res.status(201).json(data)
 

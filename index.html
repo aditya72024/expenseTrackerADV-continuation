@@ -10,13 +10,46 @@
       <script src= 
   "https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"> 
       </script> 
+      <style>
+        .float-right{
+            float:right;
+        }
+        </style>
   <title>Expense Tracker</title>
 </head>
 <body>
 
-    <nav class="navbar navbar-light bg-light" id="navbar">
+    <!-- <nav class="navbar navbar-light bg-light" id="navbar">
         <a class="navbar-brand" id="payButton" href="javascript:void(0);">Become a premium user!!!</a>
-    </nav>
+    </nav> -->
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        
+        <div class="container-fluid">
+          <a class="navbar-brand" href="javascript:void(0);">Expense Tracker</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbar-nav">
+              <!-- <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li> -->
+              <li class="nav-item" id="nav-item">
+                <a class="nav-link active" id="payButton" href="javascript:void(0);">Become a premium user</a>
+              </li>
+            
+              <!-- <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+              </li> -->
+            </ul>
+            
+          </div>
+      
+      
+        </div>
+      </nav>
+      
 
       <div class="container">
        <div id="main" class="card card-body">
@@ -139,514 +172,20 @@
       <div id="pagination" style="width:50%;float:left;">
       </div>
       <div id="rowperpage" style="width:50%;float:left;">
-
       </div>
 
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script defer src="./assets/js/regularTasks.js"></script>
+<script defer src="./assets/js/leaderBoard.js"></script>
+<script defer src="./assets/js/expenseReport.js"></script>
+<script defer src="./assets/js/downloadHistory.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
-
-
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>    
 
-var form = document.getElementById("addForm");
-var ul = document.getElementById("items");
-
-var deleteItems = document.getElementsByClassName("delete");
-var expenseDiv = document.getElementById("expenseDiv");
-var totalSpan = document.getElementById("totalSpan");
-form.addEventListener('submit', addItem);
-ul.addEventListener('click', removeItem);
-var LeaderBoardModal = new bootstrap.Modal(document.getElementById('leaderBoardModal')); 
-var ExpenseReportModal = new bootstrap.Modal(document.getElementById('expenseReportModal')); 
-var DownloadHistoryModal = new bootstrap.Modal(document.getElementById('downloadHistoryModal')); 
-
-
-
-
-
-function triggerRowPerPage(){
-        loadExpenses(localStorage.getItem("noofpage"),document.getElementById("noofrows").value);
-        localStorage.setItem("noofrows",document.getElementById("noofrows").value);
-    
-}
-// deleteItems = document.addEventListener('click', removeItem);
-
-var token = localStorage.getItem('token');
-var ispremiumuser = localStorage.getItem('ispremiumuser');
-
-
-    window.addEventListener("DOMContentLoaded",()=>{
-
-        
-
-        
-        if(ispremiumuser != null){
-            activatePremium();
-            
-        }
-
-            var noofrows = localStorage.getItem("noofrows");
-            var noofpage = localStorage.getItem("noofpage");
-
-            if(!noofrows){
-                localStorage.setItem("noofrows",1);
-            }
-            if(!noofpage){
-                localStorage.setItem("noofpage",1);
-            }
-
-            loadExpenses(noofpage,noofrows);
-            
-
-
-    })
-
-function activatePremium(){
-    document.getElementById("navbar").innerHTML = "You are a premium user!!!<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'> View Leaderboard.</a> | <a class='navbar-brand' id='showExpenseReport' href='javascript:void(0);'> View Expense Report.</a> | <a class='navbar-brand' id='showDownloadHistory' href='javascript:void(0);'> Download History.</a>";
-            document.getElementById("showLearderBoard").addEventListener('click',getLearderBoard);
-            document.getElementById("showExpenseReport").addEventListener('click',getExpenseReport);
-            document.getElementById("showDownloadHistory").addEventListener('click',getDownloadHistory);
-
-            document.getElementById("closeLeaderBoardModal").addEventListener('click',closeLeaderBoardModal);
-            document.getElementById("closeExpenseReportModal").addEventListener('click',closeExpenseReportModal);
-            document.getElementById("closeDownloadHistoryModal").addEventListener('click',closeDownloadHistoryModal);
-
-            document.getElementById("expenseDownload").addEventListener('click',expenseDownload);
-
-
-}    
-
-
-function closeLeaderBoardModal(){
-    LeaderBoardModal.hide();
-}    
-
-function closeExpenseReportModal(){
-    ExpenseReportModal.hide();
-}    
-
-function closeDownloadHistoryModal(){
-    DownloadHistoryModal.hide();
-}    
-
-function expenseDownload(){
-    axios.get("http://localhost:5000/downloadExpenses", {headers: {"Authorization":token}})
-    .then((response)=> {
-
-        if(response.status == 201){
-            var a = document.createElement("a");
-            a.href = response.data.fileURL;
-            a.download = 'myexpense.csv';
-            a.click();
-        }else{
-            throw new Error(response.data.message);
-        }
-
-    }).catch((error)=>console.log(error))
-}
-
-function loadExpenses(noofpage,noofrows){
-axios.get(`http://localhost:5000?page=${noofpage}&noofrows=${noofrows}`, {headers: {"Authorization":token}})
-  .then((response)=>{
-
-    document.getElementById("pagination").innerHTML ="";
-    document.getElementById("rowperpage").innerHTML ="";
-    document.getElementById("items").innerHTML ="";
-    items
-
-    const {data,totalExpenses,totalItems, pageData} = response.data;
-
-    if(data.length > 0){
-
-
-        expenseDiv.style.display = "block";
-        let total = 0;
-
-        for(var i = 0; i<data.length;i++){
-            showOutput(data[i], totalExpenses,pageData);   
-        }
-
-        showRowSelector(totalItems);
-        showPagination(pageData);
-
-        
-
-       
-
-    }else{
-        expenseDiv.style.display = "none";
-    }
-
-  }).catch((error)=>console.log(error))
-}
-
-function showPagination({
-    currentPage,
-    hasNextPage,
-    nextPage,
-    hasPreviousPage,
-    previousPage,
-    lastPage,
-}){
-
-    document.getElementById("pagination").innerHTML = "";
-
-    if(hasPreviousPage){
-        const btn2 = document.createElement("button")
-        btn2.innerHTML = previousPage,
-        btn2.addEventListener('click',()=>{
-            loadExpenses(previousPage,localStorage.getItem("noofrows"))
-        })
-        document.getElementById("pagination").appendChild(btn2)
-    }
-
-    const btn1 = document.createElement("button")
-    btn1.innerHTML = `<h3 id="currentPage">${currentPage}</h3>`
-    btn1.addEventListener('click',()=>{
-            loadExpenses(currentPage,localStorage.getItem("noofrows"))
-        })
-        document.getElementById("pagination").appendChild(btn1)
-
-    if(hasNextPage){
-        const btn3 = document.createElement("button");
-        btn3.innerHTML = nextPage;
-        btn3.addEventListener('click',()=>{
-            loadExpenses(nextPage,localStorage.getItem("noofrows"))
-        })
-        document.getElementById("pagination").appendChild(btn3)
-
-    }    
-
-}
-
-
-
-
-function getLearderBoard(){
-
-    axios.get("http://localhost:5000/getLeaderBoard", {headers: {"Authorization":token}})
-      .then(res =>{
-            showLeaderBoard(res.data);
-             
-      })
-      .catch(error=>console.error(error))
-
-}
-
-function showLeaderBoard(data){
-
-    var toappendTable = `<table class="table" id="superTable"><thead><tr><th>Username</th><th>Total Expense</th></tr></thead><tbody>`;
-    for(let i = 0; i<data.length; i++){
-        toappendTable += `<tr>`;
-        const newkeys = [...Object.keys(data[0])]; 
-            for(const newkey of newkeys){
-
-                console.log(newkey)
-                // if(newkey != 'user'){
-                     toappendTable += `<td>${data[i][newkey]}</td>`;
-                //  }else{
-                //      toappendTable += `<td>${data[i][newkey].username}</td>`;
-                //  }
-                
-                  
-            }
-            toappendTable += `</tr>`;
-          }    
-
-     toappendTable += `</tbody></table>`;   
-     
-     document.getElementById("leaderBoardTableBody").innerHTML = "";
-     document.getElementById("leaderBoardTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
-     LeaderBoardModal.show();      
-}
-
-
-function getExpenseReport(){
-
-    DailyExpenses();
-    WeeklyExpenses();
-    MonthlyExpenses();
-    ExpenseReportModal.show();    
-}
-
-function getDownloadHistory(){
-DownloadHistory();
-DownloadHistoryModal.show();    
-}
-
-
-
-
-
-function DailyExpenses(){
-
-    axios.get("http://localhost:5000/getDailyExpenses", {headers: {"Authorization":token}})
-      .then(res =>{
-            console.log(res.data);
-            showDailyExpenses(res.data)
-             
-      })
-      .catch(error=>console.error(error))
-
-
-}
-
-function WeeklyExpenses(){
-
-axios.get("http://localhost:5000/getWeeklyExpenses", {headers: {"Authorization":token}})
-  .then(res =>{
-        console.log(res.data);
-        showWeeklyExpenses(res.data)
-         
-  })
-  .catch(error=>console.error(error))
-
-
-}
-
-
-function MonthlyExpenses(){
-
-axios.get("http://localhost:5000/getMonthlyExpenses", {headers: {"Authorization":token}})
-  .then(res =>{
-        console.log(res.data);
-        showMonthlyExpenses(res.data)
-         
-  })
-  .catch(error=>console.error(error))
-
-
-}
-
-function DownloadHistory(){
-
-axios.get("http://localhost:5000/getDownloadHistory", {headers: {"Authorization":token}})
-  .then(res =>{
-        console.log(res.data);
-        showDownloadHistory(res.data)
-         
-  })
-  .catch(error=>console.error(error))
-
-
-}
-
-function showDownloadHistory(data){
-    var toappendTable = `<h4 class="text-center">Download History</h4><br><table class="table" id="superTable"><thead><tr><th>File URL</th></tr></thead><tbody>`;
-        let totalExpense = 0;
-        for(let i = 0; i<data.length; i++){
-        toappendTable += `<tr>`;
-        const newkeys = [...Object.keys(data[0])]; 
-        
-            for(const newkey of newkeys){
-
-               
-                     toappendTable += `<td><a href="${data[i][newkey]}" download="${data[i][newkey]}.csv">${data[i][newkey]}</a></td>`;
-                     if(newkey == 'expense'){
-                        totalExpense += +data[i][newkey];
-                     }
-               
-                
-                  
-            }
-            toappendTable += `</tr>`;
-          }    
-
-     toappendTable += `</tbody></table>`;   
-     
-     document.getElementById("downloadHistoryTableBody").innerHTML = "";
-     document.getElementById("downloadHistoryTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
-       
-
-}
-
-function showDailyExpenses(data){
-    var toappendTable = `<h4 class="text-center">Daily Report</h4><br><table class="table" id="superTable"><thead><tr><th>Expenses</th><th>Description</th><th>category</th></tr></thead><tbody>`;
-        let totalExpense = 0;
-        for(let i = 0; i<data.length; i++){
-        toappendTable += `<tr>`;
-        const newkeys = [...Object.keys(data[0])]; 
-        
-            for(const newkey of newkeys){
-
-               
-                     toappendTable += `<td>${data[i][newkey]}</td>`;
-                     if(newkey == 'expense'){
-                        totalExpense += +data[i][newkey];
-                     }
-               
-                
-                  
-            }
-            toappendTable += `</tr>`;
-          }    
-
-     toappendTable += `</tbody></table><h6 class="float-right">Total Expenses: Rs${totalExpense}</h6>`;   
-     
-     document.getElementById("dailyExpenseReportTableBody").innerHTML = "";
-     document.getElementById("dailyExpenseReportTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
-       
-
-}
-
-
-function showWeeklyExpenses(data){
-    var toappendTable = `<h4 class="text-center">Weekly Report</h4><br><table class="table" id="superTable"><thead><tr><th>Expenses</th><th>Description</th><th>category</th></tr></thead><tbody>`;
-        let totalExpense = 0;
-        for(let i = 0; i<data.length; i++){
-        toappendTable += `<tr>`;
-        const newkeys = [...Object.keys(data[0])]; 
-        
-            for(const newkey of newkeys){
-
-               
-                     toappendTable += `<td>${data[i][newkey]}</td>`;
-                     if(newkey == 'expense'){
-                        totalExpense += +data[i][newkey];
-                     }
-               
-                
-                  
-            }
-            toappendTable += `</tr>`;
-          }    
-
-     toappendTable += `</tbody></table><h6 class="float-right">Total Expenses: Rs${totalExpense}</h6>`;   
-     
-     document.getElementById("weeklyExpenseReportTableBody").innerHTML = "";
-     document.getElementById("weeklyExpenseReportTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
-       
-
-}
-
-
-function showMonthlyExpenses(data){
-    var toappendTable = `<h4 class="text-center">Monthly Report</h4><br><table class="table" id="superTable"><thead><tr><th>Expenses</th><th>Description</th><th>category</th></tr></thead><tbody>`;
-        let totalExpense = 0;
-        for(let i = 0; i<data.length; i++){
-        toappendTable += `<tr>`;
-        const newkeys = [...Object.keys(data[0])]; 
-        
-            for(const newkey of newkeys){
-
-               
-                     toappendTable += `<td>${data[i][newkey]}</td>`;
-                     if(newkey == 'expense'){
-                        totalExpense += +data[i][newkey];
-                     }
-               
-                
-                  
-            }
-            toappendTable += `</tr>`;
-          }    
-
-     toappendTable += `</tbody></table><h6 class="float-right">Total Expenses: Rs${totalExpense}</h6>`;   
-     
-     document.getElementById("monthlyExpenseReportTableBody").innerHTML = "";
-     document.getElementById("monthlyExpenseReportTableBody").appendChild(document.createRange().createContextualFragment(toappendTable))
-       
-
-}
-
-
-        function showhide() { 
-            // show Modal 
-            LeaderBoardModal.show(); 
-            // hide the modal after 5 seconds 
-            // setTimeout(() => { 
-            //     LeaderBoardModal.hide(); 
-            // }, 5000) 
-        } 
-
-
-function showOutput(data, total,pageData){
-
-
-
-      if(data){
-
-            expenseDiv.style.display = "block";
-            totalSpan.textContent = total;
-      }  
-
-     var expense = data.expense;
-      var description = data.description;
-      var category = data.category;
-      var id = data.id;
-
-
-      var value = expense + '-' + description + '-' + category;
-
-      li = document.createElement("li");
-      li.className = 'list-group-item';
-      li.setAttribute('data-id',id);
-      li.appendChild(document.createTextNode(value));
-
-      var deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn btn-primary btn-sm float-right delete';
-      deleteBtn.appendChild(document.createTextNode('Delete'));
-      li.appendChild(deleteBtn);
-
-      var editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-primary btn-sm float-right edit';
-      editBtn.appendChild(document.createTextNode('Edit'));
-      li.appendChild(editBtn);
-
-      ul.appendChild(li);
-
-      
-     
-
-}
-
-
-function showRowSelector(totalItems){
-
-    let selectBody = `<select name="noofrows" id="noofrows" onchange="triggerRowPerPage()">`
-
-    for(let i=1; i<=totalItems;i++){
-
-        selectBody += `<option value="${i}" ${localStorage.getItem("noofrows") == i ? 'selected=selected' : ''} >${i}</option>`;
-
-    }    
-            
-            
-    selectBody += `</select>`;
-    document.getElementById("rowperpage").appendChild(document.createRange().createContextualFragment(selectBody))
-
-}
-
-
-
-function addItem(e){
-    e.preventDefault();
-    var expense = document.getElementById("expense").value;
-    var description = document.getElementById("description").value;
-    var category = document.getElementById("category").value;
-    var eid = document.getElementById("expenseId").value;
-
-
-    var entryObject = {};
-    entryObject.expense = expense;
-    entryObject.description = description;
-    entryObject.category = category;
-
-    if(eid){
-
-        putInTable(entryObject,eid);
-
-    }else{
-        storeInTable(entryObject)
-    }
-    
-    document.getElementById("expense").value = '';
-    document.getElementById("description").value = '';
-    document.getElementById("category").value = '';
-    document.getElementById("expenseId").value = '';
-
-}
 
 function putInTable(data,eid){
 
@@ -665,104 +204,6 @@ function putInTable(data,eid){
 }
 
 
-
-
-
-
-function storeInTable(data){
-    console.log(token)
-
-      axios.post("http://localhost:5000/addExpense",{data
-      },{headers: {"Authorization":token}})
-      .then(res =>{
-
-               
-             loadExpenses(localStorage.getItem("noofpage"),localStorage.getItem("noofrows"));
-             
-      })
-      .catch(error=>console.error(error))
-
-}
-
-
-
-
-
-
-function removeItem(e){
-
-
-
-    var liRemove = e.target.parentElement;
-    var liRemoveid = liRemove.getAttribute('data-id');
-    
-
-    if(e.target.classList.contains('delete')){
-
-       if(confirm("Are you sure?")){
-            axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
-            .then(res=>{
-             ul.removeChild(liRemove);
-             loadExpenses(noofpage,noofrows);
-         }).catch(error=>console.error(error))
-        }}
-
-
-        if(e.target.classList.contains('edit')){
-
-            var liEdit = e.target.parentElement;
-            var liEditId = liEdit.getAttribute('data-id');
-
-            axios.get("http://localhost:5000/getParticularExpense/"+liRemoveid)
-            .then(res=> {
-
-            var expense = res.data.expense;
-            var description = res.data.description;
-            var category = res.data.category;
-            var eid = res.data.id;
-            document.getElementById("expense").value = expense;
-            document.getElementById("description").value = description;
-            document.getElementById("category").value = category;
-            document.getElementById("expenseId").value = eid;
-
-            let total = parseFloat(totalSpan.textContent) - parseFloat(res.data.expense);
-            totalSpan.textContent = total;
-
-            ul.removeChild(liEdit);
-        });
-
-        }
-}
-
-document.getElementById("payButton").onclick = async function(e){
-    const response = await axios.get('http://localhost:5000/purchase/premium',{headers: {"Authorization":token}})
-    console.log(response.data)
-    var options = {
-        "key": response.data.key_id,
-        "order_id": response.data.order.id,
-        "handler": async function(response){
-            await axios.post('http://localhost:5000/purchase/updateTransactionStatus',{
-                order_id: options.order_id,
-                payment_id: response.razorpay_payment_id,
-            }, {headers: {"Authorization": token}})
-            e.target.parentElement.innerHTML = "<a class='navbar-brand' id='showLearderBoard' href='javascript:void(0);'>You are a premium user!!! Show LeaderBoard</a>";
-            localStorage.setItem('ispremiumuser',1);
-            activatePremium();
-            alert("You are a Premium User Now");
-        }
-
-    };
-
-    const rpz1 = new Razorpay(options);
-    rpz1.open();
-    e.preventDefault();
-
-    rpz1.on('payment.failed', function (response){
-        console.log(response);
-        alert("Something went wrong");
-
-    });
-}
 
 </script>
 </html>

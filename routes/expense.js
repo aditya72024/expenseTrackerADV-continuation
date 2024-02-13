@@ -16,6 +16,6 @@ router.get('/getDailyExpenses', userauthentication.authenticate, expenseControll
 router.get('/getWeeklyExpenses', userauthentication.authenticate, expenseController.weeklyExpenses);
 router.get('/getMonthlyExpenses', userauthentication.authenticate, expenseController.monthlyExpenses);
 router.get('/getDownloadHistory', userauthentication.authenticate, expenseController.downloadHistory);
-router.put('/putExpense/:expenseId', expenseController.putExpense);
+// router.put('/putExpense/:expenseId', expenseController.putExpense);
 
 module.exports = router;
