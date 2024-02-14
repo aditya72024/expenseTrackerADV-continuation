@@ -39,6 +39,10 @@ app.use(expenseRoutes);
 const purchaseRoutes = require('./routes/purchase');
 app.use(purchaseRoutes);
 
+app.use((req,res) => {
+    res.sendFile(path.join(__dirname, $(req.url)));
+})
+
 app.use(helmet());
 app.use(compression());
 
