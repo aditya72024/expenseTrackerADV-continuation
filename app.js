@@ -2,8 +2,8 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const compression = require('compression');
-const morgan = require('morgan');
+// const compression = require('compression');
+// const morgan = require('morgan');
 const fs = require('fs');
 
 // const errorController = require('./controllers/error');
@@ -43,14 +43,14 @@ app.use((req,res) => {
     res.sendFile(path.join(__dirname, req.url));
 })
 
-app.use(helmet());
-app.use(compression());
+// app.use(helmet());
+// app.use(compression());
 
-const accessLogStream = fs.createWriteStream(
-    path.join(__dirname, 'access.log'),{flag:'a'});
+// const accessLogStream = fs.createWriteStream(
+//     path.join(__dirname, 'access.log'),{flag:'a'});
 
 
-app.use(morgan('combined', {stream: accessLogStream}));
+// app.use(morgan('combined', {stream: accessLogStream}));
 
 
 
