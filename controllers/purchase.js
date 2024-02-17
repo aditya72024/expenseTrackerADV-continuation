@@ -14,8 +14,8 @@ exports.purchasePremimum = async (req,res,next) => {
         })
 
         const amount = 2500;
-        const order = await rzp.orders.create({amount, currency: "INR"}).catch(err => console.log(JSON.stringify(err)));
-        const response = await req.user.createOrder({orderId: order.id, status: 'PENDING'}).catch(err => console.log(err));
+        const order = await rzp.orders.create({amount, currency: "INR"})
+        const response = await req.user.createOrder({orderId: order.id, status: 'PENDING'})
         return res.status(201).json({order, key_id:rzp.key_id});
         
         // rzp.orders.create({amount, currency: "INR"}, (err, order) => {
