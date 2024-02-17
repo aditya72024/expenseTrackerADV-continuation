@@ -68,7 +68,7 @@ const loadExpenses = async (noofpage,noofrows) => {
     try{
 
     
-    const response = await axios.get(`http://localhost:5000?page=${noofpage}&noofrows=${noofrows}`, {headers: {"Authorization":token}})
+    const response = await axios.get(`http://51.20.41.247:5000?page=${noofpage}&noofrows=${noofrows}`, {headers: {"Authorization":token}})
       
     
         document.getElementById("pagination").innerHTML ="";
@@ -234,7 +234,7 @@ const loadExpenses = async (noofpage,noofrows) => {
   function storeInTable(data){
     console.log(token)
 
-      axios.post("http://localhost:5000/addExpense",{data
+      axios.post("http://51.20.41.247:5000/addExpense",{data
       },{headers: {"Authorization":token}})
       .then(res =>{
 
@@ -262,7 +262,7 @@ function removeItem(e){
     if(e.target.classList.contains('delete')){
 
        if(confirm("Are you sure?")){
-            axios.delete("http://localhost:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
+            axios.delete("http://51.20.41.247:5000/deleteExpense/"+liRemoveid, {headers: {"Authorization":token}})
             .then(res=>{
              ul.removeChild(liRemove);
              loadExpenses(noofpage,noofrows);
@@ -275,7 +275,7 @@ function removeItem(e){
             var liEdit = e.target.parentElement;
             var liEditId = liEdit.getAttribute('data-id');
 
-            axios.get("http://localhost:5000/getParticularExpense/"+liRemoveid)
+            axios.get("http://51.20.41.247:5000/getParticularExpense/"+liRemoveid)
             .then(res=> {
 
             var expense = res.data.expense;
@@ -297,13 +297,13 @@ function removeItem(e){
 }
 
 document.getElementById("payButton").onclick = async function(e){
-    const response = await axios.get('http://localhost:5000/purchase/premium',{headers: {"Authorization":token}})
+    const response = await axios.get('http://51.20.41.247:5000/purchase/premium',{headers: {"Authorization":token}})
     console.log(response.data)
     var options = {
         "key": response.data.key_id,
         "order_id": response.data.order.id,
         "handler": async function(response){
-            await axios.post('http://localhost:5000/purchase/updateTransactionStatus',{
+            await axios.post('http://51.20.41.247:5000/purchase/updateTransactionStatus',{
                 order_id: options.order_id,
                 payment_id: response.razorpay_payment_id,
             }, {headers: {"Authorization": token}})

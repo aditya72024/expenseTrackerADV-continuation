@@ -14,7 +14,7 @@ function getExpenseReport(){
 
 
 function expenseDownload(){
-    axios.get("http://localhost:5000/downloadExpenses", {headers: {"Authorization":token}})
+    axios.get("http://51.20.41.247:5000/downloadExpenses", {headers: {"Authorization":token}})
     .then((response)=> {
 
         if(response.status == 201){
@@ -32,7 +32,7 @@ function expenseDownload(){
 
 function DailyExpenses(){
 
-    axios.get("http://localhost:5000/getDailyExpenses", {headers: {"Authorization":token}})
+    axios.get("http://51.20.41.247:5000/getDailyExpenses", {headers: {"Authorization":token}})
       .then(res =>{
             console.log(res.data);
             showDailyExpenses(res.data)
@@ -45,7 +45,7 @@ function DailyExpenses(){
 
 function WeeklyExpenses(){
 
-axios.get("http://localhost:5000/getWeeklyExpenses", {headers: {"Authorization":token}})
+axios.get("http://51.20.41.247:5000/getWeeklyExpenses", {headers: {"Authorization":token}})
   .then(res =>{
         console.log(res.data);
         showWeeklyExpenses(res.data)
@@ -59,7 +59,7 @@ axios.get("http://localhost:5000/getWeeklyExpenses", {headers: {"Authorization":
 
 function MonthlyExpenses(){
 
-axios.get("http://localhost:5000/getMonthlyExpenses", {headers: {"Authorization":token}})
+axios.get("http://51.20.41.247:5000/getMonthlyExpenses", {headers: {"Authorization":token}})
   .then(res =>{
         console.log(res.data);
         showMonthlyExpenses(res.data)

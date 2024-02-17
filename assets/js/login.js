@@ -48,7 +48,7 @@ const getLoginData = async (data) => {
 
     try{
         
-        const res = await axios.post("http://localhost:5000/user/login",{data});
+        const res = await axios.post("http://51.20.41.247:5000/user/login",{data});
         alert(res.data.message);
         localStorage.setItem('token',res.data.token);
         localStorage.setItem('ispremiumuser',res.data.ispremiumuser);

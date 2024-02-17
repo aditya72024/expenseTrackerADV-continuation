@@ -48,7 +48,7 @@ function signUp(e){
 const getSignUpData = async(data) => {
 
     try{
-        const res = await axios.post("http://localhost:5000/user/signup",{data})
+        const res = await axios.post("http://51.20.41.247:5000/user/signup",{data})
         alert(res.data.message);
         window.location.href = "login.html";
     }catch(error){

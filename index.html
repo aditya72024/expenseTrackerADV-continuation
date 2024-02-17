@@ -187,21 +187,21 @@
 <script>    
 
 
-function putInTable(data,eid){
+// function putInTable(data,eid){
 
-      axios.put("http://localhost:5000/putExpense/"+eid,{data
-      })
-      .then(res =>{
+//       axios.put("http://localhost:5000/putExpense/"+eid,{data
+//       })
+//       .then(res =>{
 
                
-             let total = parseFloat(JSON.parse(res.config.data).data.expense)+parseFloat(totalSpan.textContent);
+//              let total = parseFloat(JSON.parse(res.config.data).data.expense)+parseFloat(totalSpan.textContent);
                
-             showOutput(JSON.parse(res.config.data).data, total);
+//              showOutput(JSON.parse(res.config.data).data, total);
              
-      })
-      .catch(error=>console.error(error))
+//       })
+//       .catch(error=>console.error(error))
 
-}
+// }
 
 
 

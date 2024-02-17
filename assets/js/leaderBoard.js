@@ -7,7 +7,7 @@ function closeLeaderBoardModal(){
 const getLearderBoard = async () => {
 
     try{
-        const res = await axios.get("http://localhost:5000/getLeaderBoard", {headers: {"Authorization":token}})
+        const res = await axios.get("http://51.20.41.247:5000/getLeaderBoard", {headers: {"Authorization":token}})
         showLeaderBoard(res.data);
     }catch(error){
         if(error){

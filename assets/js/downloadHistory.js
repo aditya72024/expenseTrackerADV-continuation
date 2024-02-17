@@ -14,7 +14,7 @@ function getDownloadHistory(){
 
 function DownloadHistory(){
 
-        axios.get("http://localhost:5000/getDownloadHistory", {headers: {"Authorization":token}})
+        axios.get("http://51.20.41.247:5000/getDownloadHistory", {headers: {"Authorization":token}})
           .then(res =>{
                 console.log(res.data);
                 showDownloadHistory(res.data)
